@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	default-autowire="byName" default-lazy-init="false">
+	<context:component-scan base-package="org.jerry" />
+
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringHttpMessageConverter" />
+				<ref bean="mappingJackson2HttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+	<bean id="stringHttpMessageConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=utf-8</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="mappingJackson2HttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json</value>
+			</list>
+		</property>
+	</bean>
+
+
+	<!-- 根据客户端的不同的请求决定不同的view进行响应, 如 /blog/1.json /blog/1.xml <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver"> 
+		<property name="viewResolvers"> <list> <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" 
+		/> <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+		<property name="prefix" value="/jsp/"/> <property name="suffix" value=".jsp"/> 
+		</bean> </list> </property> </bean> -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/jsp/" p:suffix=".jsp" />
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="1000000" />
+	</bean>
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="com.xunyou.gameguide.exception.ApiException">api_error</prop>
+				<prop key="org.springframework.web.multipart.MaxUploadSizeExceededException">redirect:/web/union/advs/error</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/api/**"></mvc:mapping>
+			<bean class="com.xunyou.gameguide.filter.SessionFilter">
+		         <property name="whiteList">
+		             <list>
+		                 <value>/api/uninstall</value>
+		                 <value>/api/feedback</value>
+		                 <value>/api/recommapp</value>
+		                 <value>/api/flushCache</value>
+		                 <value>/api/recommend</value>
+		                 <value>/api/downreport</value>
+		                 <value>/api/statistics</value>
+		             </list>
+		         </property>
+			</bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+ 	-->
+
+	<!-- <bean id="RequestInterceptor" class="com.xunyou.gameguide.log.RequestInterceptor"/> 
+		<aop:config> <aop:aspect ref="RequestInterceptor"> <aop:around method="notifyAround" 
+		pointcut="execution(* com.xunyou.gameguide.*.*(..))"/> </aop:aspect> </aop:config> -->
+		
+		
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource">
+		<ref local="dataSource" />
+		</property>
+	</bean>	
+	 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://172.16.0.27:3306/redis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="jiangshaowei"/>
+    </bean>
+    
+    <!--  <context:property-placeholder location="jdbc.properties"/>  -->
+</beans>
